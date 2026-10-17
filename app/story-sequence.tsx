@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {
  DEPARTURE_TEXT,
  WONDER_TEXT,
@@ -29,24 +29,30 @@ function getStoryText(stage:JourneyStage):string{
 export default function StorySequence({stage,onNext}:{stage:JourneyStage;onNext:()=>void}){
  const [ready,setReady]=useState(false);
  const [fading,setFading]=useState(false);
+ const advanced=useRef(false),advanceTimer=useRef<number|null>(null);
  const love=stage==='love';
  const text=getStoryText(stage);
 
+ useEffect(()=>()=>{if(advanceTimer.current!==null)window.clearTimeout(advanceTimer.current)},[]);
+
+ function advance(){
+  if(advanced.current)return;advanced.current=true;setFading(true);advanceTimer.current=window.setTimeout(onNext,550);
+ }
+
  function handleClick(){
-  if(!ready||fading)return;
-  setFading(true);
-  setTimeout(onNext,550);
+  if(!ready||love||fading)return;
+  advance();
  }
 
  return <section
-  className={'story-screen '+(love?'story-love ':'')+(love&&ready?'love-blooming ':'')+(fading?'story-fading':'')+(ready?' story-clickable':'')}
+  className={'story-screen '+(love?'story-love ':'')+(love&&ready?'love-blooming ':'')+(fading?'story-fading':'')+(ready&&!love?' story-clickable':'')}
   aria-live="polite"
   onClick={handleClick}
  >
   <p className="story-line">
    <Typewriter text={text} speed={love?130:48} delay={280} onComplete={()=>setReady(true)}/>
   </p>
-  {ready&&<span className="story-tap-hint">Chạm để tiếp tục</span>}
-  {love&&ready&&<LoveBloom/>}
+  {ready&&!love&&<span className="story-tap-hint">Chạm để tiếp tục</span>}
+  {love&&ready&&<LoveBloom onComplete={advance}/>}
  </section>;
 }
