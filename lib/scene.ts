@@ -173,6 +173,10 @@ export function createScene(canvas:HTMLCanvasElement,layer:HTMLDivElement,callba
    const zoomT=smooth(zoomProgress);
    view.zoom=.35+(.65)*zoomT;
    if(stageClock>1.1)ask();
+   if(!pointers.size){
+    if(Math.abs(velYaw)>.001){view.yaw+=velYaw*dt;velYaw*=Math.exp(-dt*3.5)}
+    if(Math.abs(velPitch)>.001){view.pitch=clamp(view.pitch+velPitch*dt,-1.45,1.45);velPitch*=Math.exp(-dt*3.5)}
+   }
   }
 
   if(stage==='flight'&&stageClock>=FLIGHT_SECONDS)setStage('galaxy');
@@ -237,7 +241,9 @@ export function createScene(canvas:HTMLCanvasElement,layer:HTMLDivElement,callba
  const interactive=()=>stage==='solar'||(stage==='galaxy'&&!travelling);
  function down(e:PointerEvent){
   if(e.button>0||!interactive())return;
-  callbacks.gesture();pointers.set(e.pointerId,xy(e));
+  callbacks.gesture();
+  try{layer.setPointerCapture(e.pointerId)}catch{}
+  pointers.set(e.pointerId,xy(e));
   velYaw=0;velPitch=0;
   if(pointers.size===1){moved=false;gesture={x:e.clientX,y:e.clientY,ox:e.clientX,oy:e.clientY}}
   else if(pointers.size===2){pin=pinch(...Array.from(pointers.values()) as [{x:number;y:number},{x:number;y:number}]);moved=true;suppress=Infinity}
@@ -277,9 +283,9 @@ export function createScene(canvas:HTMLCanvasElement,layer:HTMLDivElement,callba
   e.preventDefault();clearFocus();if(e.key==='ArrowLeft')view.yaw-=Math.PI/6;if(e.key==='ArrowRight')view.yaw+=Math.PI/6;if(e.key==='ArrowUp')view.pitch=clamp(view.pitch-.2,-1.45,1.45);if(e.key==='ArrowDown')view.pitch=clamp(view.pitch+.2,-1.45,1.45);
  }
  function blur(){pointers.clear();gesture=null;pin=null;suppress=performance.now()+300;velYaw=0;velPitch=0}
- layer.addEventListener('keydown',key);layer.addEventListener('pointerdown',down);window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',up);window.addEventListener('blur',blur);layer.addEventListener('click',backgroundClick);layer.addEventListener('wheel',wheel,{passive:false});window.addEventListener('resize',resize);
+ layer.addEventListener('keydown',key);layer.addEventListener('pointerdown',down);layer.addEventListener('pointermove',move);layer.addEventListener('pointerup',up);layer.addEventListener('pointercancel',up);layer.addEventListener('lostpointercapture',up);window.addEventListener('blur',blur);layer.addEventListener('click',backgroundClick);layer.addEventListener('wheel',wheel,{passive:false});window.addEventListener('resize',resize);
  resize();raf=requestAnimationFrame(draw);
  return{setPhotos,beginSolar,overview,restart,advanceStory,clearSelection:clearFocus,closeGallery,enter,destroy(){
-  alive=false;cancelAnimationFrame(raf);solar.destroy();core.remove();layer.removeEventListener('keydown',key);layer.removeEventListener('pointerdown',down);window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);window.removeEventListener('blur',blur);layer.removeEventListener('click',backgroundClick);layer.removeEventListener('wheel',wheel);window.removeEventListener('resize',resize);for(const n of nodes)n.el.remove();for(const el of planetButtons.values())el.remove();
+  alive=false;cancelAnimationFrame(raf);solar.destroy();core.remove();layer.removeEventListener('keydown',key);layer.removeEventListener('pointerdown',down);layer.removeEventListener('pointermove',move);layer.removeEventListener('pointerup',up);layer.removeEventListener('pointercancel',up);layer.removeEventListener('lostpointercapture',up);window.removeEventListener('blur',blur);layer.removeEventListener('click',backgroundClick);layer.removeEventListener('wheel',wheel);window.removeEventListener('resize',resize);for(const n of nodes)n.el.remove();for(const el of planetButtons.values())el.remove();
  }};
 }
