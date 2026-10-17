@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {
  DEPARTURE_TEXT,
  WONDER_TEXT,
@@ -29,8 +29,18 @@ function getStoryText(stage:JourneyStage):string{
 export default function StorySequence({stage,onNext}:{stage:JourneyStage;onNext:()=>void}){
  const [ready,setReady]=useState(false);
  const [fading,setFading]=useState(false);
+ const onNextRef=useRef(onNext);onNextRef.current=onNext;
  const love=stage==='love';
  const text=getStoryText(stage);
+
+ useEffect(()=>{
+  if(!love||!ready)return;
+  const timer=window.setTimeout(()=>{
+   setFading(true);
+   window.setTimeout(()=>onNextRef.current(),650);
+  },3000);
+  return()=>window.clearTimeout(timer);
+ },[love,ready]);
 
  function handleClick(){
   if(!ready||fading)return;
