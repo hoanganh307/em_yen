@@ -54,7 +54,6 @@ export default function Galaxy(){
   <div className="edge-shade" aria-hidden="true"/>
   {phase==='intro'&&<Intro onAccept={accept}/>}
   {phase!=='intro'&&<button className="journey-back" onClick={back} aria-label={backLabel} title={backLabel}>‹</button>}
-  {(phase==='solar'||phase==='galaxy')&&<div className="scene-zoom" aria-label="Điều chỉnh độ phóng đại"><button onClick={()=>scene.current?.zoomBy(1.3)} aria-label="Phóng to" title="Phóng to">+</button><button onClick={()=>scene.current?.zoomBy(1/1.3)} aria-label="Thu nhỏ" title="Thu nhỏ">−</button></div>}
   {phase==='galaxy'&&<button className="gallery-settings" onClick={()=>setEditing(true)} aria-label="Quản lý, thêm hoặc xóa ảnh" title="Quản lý ảnh">⚙</button>}
   {phase==='solar'&&prompt&&<section className="solar-question" aria-live="polite"><p><Words text={SOLAR_INVITATION}/></p></section>}
   {STORY_STAGES.includes(phase)&&<StorySequence key={phase} stage={phase} onNext={()=>scene.current?.advanceStory()}/>}
