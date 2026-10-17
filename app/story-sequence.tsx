@@ -38,10 +38,22 @@ export default function StorySequence({stage,onNext}:{stage:JourneyStage;onNext:
   setTimeout(onNext,550);
  }
 
+ function handleKeyDown(event:React.KeyboardEvent<HTMLElement>){
+  if((event.code==='Space'||event.code==='Enter')&&ready){
+   event.preventDefault();
+   handleClick();
+  }
+ }
+
  return <section
   className={'story-screen '+(love?'story-love ':'')+(love&&ready?'love-blooming ':'')+(fading?'story-fading':'')+(ready?' story-clickable':'')}
   aria-live="polite"
+  role="button"
+  tabIndex={ready?0:-1}
+  aria-label={ready?'Chạm hoặc nhấn Space để tiếp tục':''}
   onClick={handleClick}
+  onPointerUp={event=>{if(event.target===event.currentTarget)handleClick()}}
+  onKeyDown={handleKeyDown}
  >
   <p className="story-line">
    <Typewriter text={text} speed={love?130:48} delay={280} onComplete={()=>setReady(true)}/>
