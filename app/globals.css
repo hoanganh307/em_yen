@@ -198,6 +198,7 @@ dialog::backdrop{background:#03020bcc;backdrop-filter:blur(4px)}
 .story-screen.story-fading{opacity:0}
 .story-screen.story-clickable{pointer-events:auto;cursor:pointer}
 .story-tap-hint{position:absolute;bottom:max(50px,calc(env(safe-area-inset-bottom) + 30px));left:0;right:0;text-align:center;color:#eddcee;font-size:14px;letter-spacing:.06em;opacity:.75;animation:tapHintPulse 2.2s ease-in-out infinite;pointer-events:none;z-index:20;text-shadow:0 0 14px #d498ca66}
+.story-love .story-tap-hint{display:none}
 @keyframes tapHintPulse{0%,100%{opacity:.35;transform:translateY(3px)}50%{opacity:.95;transform:translateY(-2px)}}
 .story-line{width:min(850px,100%);margin:0;text-align:center;color:#f0e7e3;font-size:clamp(25px,3vw,42px);line-height:1.8;transform:translateY(-12px);text-wrap:balance}
 .story-love .story-line{font-size:clamp(47px,8vw,90px);color:#f2d9e2;line-height:1.6;text-shadow:0 0 45px #c38ba729}

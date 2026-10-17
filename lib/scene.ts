@@ -242,7 +242,8 @@ export function createScene(canvas:HTMLCanvasElement,layer:HTMLDivElement,callba
  function down(e:PointerEvent){
   if(e.button>0||!interactive())return;
   callbacks.gesture();
-  try{layer.setPointerCapture(e.pointerId)}catch{}
+  // Capture on the pressed button so pointerup still produces its click event.
+  try{const target=e.target instanceof HTMLElement?e.target:layer;target.setPointerCapture(e.pointerId)}catch{}
   pointers.set(e.pointerId,xy(e));
   velYaw=0;velPitch=0;
   if(pointers.size===1){moved=false;gesture={x:e.clientX,y:e.clientY,ox:e.clientX,oy:e.clientY}}
