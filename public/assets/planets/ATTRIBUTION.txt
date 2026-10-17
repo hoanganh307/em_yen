@@ -1,0 +1,6 @@
+Planet textures by Solar System Scope / INOVE
+Source: https://www.solarsystemscope.com/textures/
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+Maps retained in original 2K resolution; sampled, shaded and animated by the website renderer.
+These are illustrative maps with tuned colours and filled gaps, not scientific measurement products.

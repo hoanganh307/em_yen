@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';import vm from 'node:vm';import ts from 'typescript';import {webcrypto} from 'node:crypto';
+const modules={};function load(name){if(modules[name])return modules[name];const exports={};modules[name]=exports;const source=ts.transpileModule(fs.readFileSync(`lib/${name}.ts`,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;vm.runInContext(source,vm.createContext({exports,require:p=>load(p.replace('./','')),File,FormData,Response,Request,Headers,URL,crypto:webcrypto,fetch,console}));return exports}
+const {defaultTracks,nextTrack}=load('tracks'),{listTracks,writeTrack}=load('music-store');
+const objects=new Map();function bucket(){return{get:async key=>{const o=objects.get(key);return o?{...o,json:async()=>JSON.parse(o.body),arrayBuffer:async()=>o.body}:null},put:async(key,body,options)=>{const o={key,body,...options,etag:'test'};objects.set(key,o);return o}}}
+const form=(withFile=true,start='12.5')=>{const f=new FormData();f.append('start',start);if(withFile)f.append('audio',new File([new Uint8Array([73,68,51,4,0,0,0,0,0,0])],'music.mp3',{type:'audio/mpeg'}));return f},request=f=>new Request('https://example.test/api/tracks/in-love',{method:'PUT',headers:{'oai-authenticated-user-id':'owner',origin:'https://example.test'},body:f});
+assert.equal(defaultTracks.length,5);assert.equal(defaultTracks.filter(t=>t.src).length,1);assert.equal(nextTrack(defaultTracks,'den-khi-nao').id,'den-khi-nao');
+const saved=await writeTrack(request(form()),bucket(),'in-love');assert.equal(saved.start,12.5);assert.ok(saved.src.startsWith('/music/in-love?'));
+const reloaded=await listTracks(bucket());assert.equal(reloaded.filter(t=>t.src).length,2);assert.equal(reloaded.find(t=>t.id==='in-love').start,12.5);assert.equal(nextTrack(reloaded,'den-khi-nao').id,'in-love');assert.equal(nextTrack(reloaded,'in-love').id,'den-khi-nao');
+await writeTrack(request(form(false,'30')),bucket(),'in-love');assert.equal((await listTracks(bucket())).find(t=>t.id==='in-love').start,30);
+await assert.rejects(()=>writeTrack(request(form(false)),bucket(),'thanh-do'),/chọn tệp/);
+await assert.rejects(()=>writeTrack(request(form(true,'-1')),bucket(),'thanh-do'),/hợp lệ/);
+const bad=form(false);bad.append('audio',new File(['<script>evil</script>'],'fake.mp3',{type:'audio/mpeg'}));await assert.rejects(()=>writeTrack(request(bad),bucket(),'thanh-do'),/MP3/);
+console.log('PASS nhạc: 5 mục, hiển thị đúng bài chưa có tệp, tự chuyển qua bài có nhạc, phát lặp danh sách, lưu tệp và vị trí cao trào, đọc lại đúng sau khi mở lại.');
